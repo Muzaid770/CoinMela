@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -5,70 +6,169 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coin Mela - Admin Panel</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #121212; color: #fff; padding: 20px; }
-        h2 { color: #f39c12; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1e1e1e; }
-        th, td { border: 1px solid #333; padding: 12px; text-align: left; font-size: 14px; }
-        th { background: #2a2a2a; color: #f39c12; }
-        .btn-approve { background: #2ecc71; color: #000; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-reject { background: #e74c3c; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+        .card {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        h2, h3 { color: #ffb703; margin-top: 0; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 13px; color: #ccc; margin-bottom: 4px; }
+        input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background-color: #2b2b2b;
+            color: #fff;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #ffb703;
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .user-details {
+            background-color: #2b2b2b;
+            padding: 12px;
+            border-radius: 6px;
+            line-height: 1.6;
+        }
+        .preview-img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin-top: 10px;
+            border: 1px solid #444;
+            border-radius: 6px;
+        }
     </style>
 </head>
 <body>
 
-<h2>Coin Mela - Admin Approval Panel</h2>
+<div class="container">
+    <h2>Admin Panel Control</h2>
 
-<table>
-    <thead>
-        <tr>
-            <th>User ID</th>
-            <th>Name</th>
-            <th>Mobile</th>
-            <th>Plan</th>
-            <th>UTR / Ref No</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody id="requestTable">
-        <!-- Data dynamic load hoga -->
-    </tbody>
-</table>
+    <!-- Payment Settings Control -->
+    <div class="card">
+        <h3>Update Payment Details</h3>
+        
+        <div class="form-group">
+            <label>QR Code Photo Select Karein (Upload):</label>
+            <input type="file" id="adminQrFile" accept="image/*" onchange="previewAndConvertQR(event)">
+            <br>
+            <img id="qrPreview" class="preview-img" src="" alt="QR Preview" style="display:none;">
+        </div>
+
+        <div class="form-group">
+            <label>UPI ID:</label>
+            <input type="text" id="adminUpi" placeholder="e.g. 9876543210@paytm">
+        </div>
+        <div class="form-group">
+            <label>Account Holder Name:</label>
+            <input type="text" id="adminAccName" placeholder="Account Name">
+        </div>
+        <div class="form-group">
+            <label>Account Number:</label>
+            <input type="text" id="adminAccNo" placeholder="Account Number">
+        </div>
+        <div class="form-group">
+            <label>IFSC Code:</label>
+            <input type="text" id="adminIfsc" placeholder="IFSC Code">
+        </div>
+        <div class="form-group">
+            <label>Bank Name:</label>
+            <input type="text" id="adminBank" placeholder="Bank Name">
+        </div>
+        <button onclick="savePaymentSettings()">Save Payment Details</button>
+    </div>
+
+    <!-- Submitted Users List -->
+    <div class="card">
+        <h3>Recent Submissions</h3>
+        <div class="user-details" id="submissionData">
+            Loading submission...
+        </div>
+    </div>
+</div>
 
 <script>
-    function loadRequests() {
-        let requests = JSON.parse(localStorage.getItem('coinMelaRequests') || '[]');
-        let tbody = document.getElementById('requestTable');
-        tbody.innerHTML = '';
+let qrBase64Data = "";
 
-        requests.forEach((req, index) => {
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${req.id}</td>
-                <td>${req.name}</td>
-                <td>${req.mobile}</td>
-                <td>${req.plan}</td>
-                <td>${req.utr || 'N/A'}</td>
-                <td><b style="color:${req.status === 'Approved' ? '#2ecc71' : (req.status === 'Rejected' ? '#e74c3c' : '#f1c40f')}">${req.status}</b></td>
-                <td>
-                    ${req.status === 'Pending' ? `
-                        <button class="btn-approve" onclick="updateStatus(${index}, 'Approved')">Approve</button>
-                        <button class="btn-reject" onclick="updateStatus(${index}, 'Rejected')">Reject</button>
-                    ` : 'Done'}
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
+window.onload = function() {
+    document.getElementById('adminUpi').value = localStorage.getItem('paymentUpi') || '';
+    document.getElementById('adminAccName').value = localStorage.getItem('paymentAccName') || '';
+    document.getElementById('adminAccNo').value = localStorage.getItem('paymentAccNo') || '';
+    document.getElementById('adminIfsc').value = localStorage.getItem('paymentIfsc') || '';
+    document.getElementById('adminBank').value = localStorage.getItem('paymentBank') || '';
+
+    qrBase64Data = localStorage.getItem('paymentQrImg') || '';
+    if (qrBase64Data) {
+        const img = document.getElementById('qrPreview');
+        img.src = qrBase64Data;
+        img.style.display = 'block';
     }
 
-    function updateStatus(index, status) {
-        let requests = JSON.parse(localStorage.getItem('coinMelaRequests') || '[]');
-        requests[index].status = status;
-        localStorage.setItem('coinMelaRequests', JSON.stringify(requests));
-        loadRequests();
+    const name = localStorage.getItem('userName') || 'N/A';
+    const mobile = localStorage.getItem('userMobile') || 'N/A';
+    const utr = localStorage.getItem('userUTR') || 'Pending';
+
+    document.getElementById('submissionData').innerHTML = `
+        <strong>Name:</strong> ${name}<br>
+        <strong>Mobile:</strong> ${mobile}<br>
+        <strong>Amount:</strong> ₹1377<br>
+        <strong>UTR/Txn ID:</strong> <span style="color:#2ec4b6">${utr}</span>
+    `;
+};
+
+function previewAndConvertQR(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            qrBase64Data = e.target.result;
+            const img = document.getElementById('qrPreview');
+            img.src = qrBase64Data;
+            img.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function savePaymentSettings() {
+    localStorage.setItem('paymentUpi', document.getElementById('adminUpi').value);
+    localStorage.setItem('paymentAccName', document.getElementById('adminAccName').value);
+    localStorage.setItem('paymentAccNo', document.getElementById('adminAccNo').value);
+    localStorage.setItem('paymentIfsc', document.getElementById('adminIfsc').value);
+    localStorage.setItem('paymentBank', document.getElementById('adminBank').value);
+    
+    if (qrBase64Data) {
+        localStorage.setItem('paymentQrImg', qrBase64Data);
     }
 
-    loadRequests();
+    alert('Payment Details & QR Code Successfully Updated!');
+}
 </script>
 
 </body>
