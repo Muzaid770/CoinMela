@@ -5,48 +5,142 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coin Mela - Payment</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #121212; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { background: #1e1e1e; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h2 { color: #f39c12; }
-        .upi-box { background: #2a2a2a; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 18px; font-weight: bold; color: #2ecc71; border: 1px dashed #2ecc71; }
-        input { width: 100%; padding: 12px; margin-top: 10px; border: 1px solid #333; border-radius: 6px; background: #2a2a2a; color: #fff; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #2ecc71; border: none; border-radius: 6px; color: #000; font-weight: bold; font-size: 16px; margin-top: 20px; cursor: pointer; }
-        button:hover { background: #27ae60; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #1e1e1e;
+            padding: 25px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        h2 { color: #ffb703; margin-bottom: 10px; }
+        .amount-box {
+            background-color: #2b2b2b;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #2ec4b6;
+            margin: 15px 0;
+        }
+        .qr-card {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        .qr-card img {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+        }
+        .details-box {
+            background-color: #2b2b2b;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-align: left;
+            line-height: 1.6;
+        }
+        .details-box strong { color: #ffb703; }
+        .btn-pay {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: #ffb703;
+            color: #000;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        .form-group { text-align: left; margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #ccc; font-size: 14px; }
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background-color: #2b2b2b;
+            color: #fff;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #2ec4b6;
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Complete Your Payment</h2>
-    <p>Niche diye gaye UPI ID par payment karein:</p>
+<div class="container">
+    <h2>Complete Payment</h2>
+    <p style="color: #bbb; font-size: 14px; margin: 0;">Niche QR Code, UPI ya Bank Details par payment karein:</p>
     
-    <div class="upi-box" id="upiId">coinmela@upi</div>
+    <div class="amount-box">Total Amount: ₹1377</div>
 
-    <form onsubmit="submitPayment(event)">
-        <label style="display:block; text-align:left; color:#bbb; margin-top:15px;">Transaction / UTR ID</label>
-        <input type="text" id="utr" required placeholder="12 Digit UTR / Ref No.">
+    <!-- QR Code Section -->
+    <div class="qr-card">
+        <!-- Auto-generated QR Code (Aapki UPI ID se auto-generate hoga) -->
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=YOUR_UPI_ID@upi&pn=CoinMela&am=1377" alt="UPI QR Code">
+    </div>
 
+    <!-- Direct App Pay Button -->
+    <a href="upi://pay?pa=YOUR_UPI_ID@upi&pn=CoinMela&am=1377" class="btn-pay">Pay via UPI App (GPay/PhonePe/Paytm)</a>
+
+    <!-- Account & UPI Details Box -->
+    <div class="details-box">
+        <strong>UPI ID:</strong> YOUR_UPI_ID@upi<br>
+        <hr style="border: 0.2px solid #444; margin: 8px 0;">
+        <strong>mujaid khan:</strong> Apne Bank>9896262431<br>
+        <strong>Account Number:</strong> 1234567890<br>
+        <strong>IFSC Code:</strong> IFSC: AIRP0000001<br>
+        <strong>Bank Name:</strong> Apne Bank Ka Naam
+    </div>
+
+    <!-- Transaction ID Submission Form -->
+    <form onsubmit="submitTransaction(event)">
+        <div class="form-group">
+            <label>Payment Ke Baad UTR / Transaction ID Daalein:</label>
+            <input type="text" id="utr" placeholder="12-digit UTR / Reference No." required>
+        </div>
         <button type="submit">Submit Payment Details</button>
     </form>
 </div>
 
 <script>
-    function submitPayment(e) {
-        e.preventDefault();
-        let user = JSON.parse(localStorage.getItem('currentUser'));
-        if(!user) { alert('Pehle registration karein!'); window.location.href='index.html'; return; }
-        
-        user.utr = document.getElementById('utr').value;
-        user.date = new Date().toLocaleString();
-
-        let allRequests = JSON.parse(localStorage.getItem('coinMelaRequests') || '[]');
-        allRequests.push(user);
-        localStorage.setItem('coinMelaRequests', JSON.stringify(allRequests));
-
-        alert('Payment details submit ho gayi hain! Admin approval ka wait karein.');
-        window.location.href = 'index.html';
-    }
+function submitTransaction(e) {
+    e.preventDefault();
+    const utr = document.getElementById('utr').value;
+    localStorage.setItem('userUTR', utr);
+    alert('Aapka payment submit ho gaya hai! Admin approval ke liye wait karein.');
+    window.location.href = 'admin.html';
+}
 </script>
 
 </body>
 </html>
+
