@@ -3,206 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coin Mela - Admin Panel</title>
+    <title>Coin Mela - Payment</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #121212;
             color: #ffffff;
-            padding: 20px;
-            margin: 0;
             display: flex;
             justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
         }
         .container {
-            width: 100%;
-            max-width: 500px;
-        }
-        .card {
             background-color: #1e1e1e;
-            padding: 20px;
+            padding: 25px;
             border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
         }
-        h2, h3 { color: #ffb703; margin-top: 0; }
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-size: 13px; color: #ccc; margin-bottom: 4px; }
+        h2 { color: #ffb703; margin-bottom: 10px; }
+        .amount-box {
+            background-color: #2b2b2b;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #2ec4b6;
+            margin: 15px 0;
+        }
+        .qr-card {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        .qr-card img {
+            width: 220px;
+            height: 220px;
+            object-fit: contain;
+        }
+        .details-box {
+            background-color: #2b2b2b;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-align: left;
+            line-height: 1.6;
+        }
+        .details-box strong { color: #ffb703; }
+        .btn-pay {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: #ffb703;
+            color: #000;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        .form-group { text-align: left; margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #ccc; font-size: 14px; }
         input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
             border: 1px solid #333;
             background-color: #2b2b2b;
             color: #fff;
             box-sizing: border-box;
+            font-size: 15px;
         }
         button {
             width: 100%;
-            padding: 12px;
-            background-color: #ffb703;
+            padding: 14px;
+            background-color: #2ec4b6;
             color: #000;
             border: none;
             border-radius: 6px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
-        }
-        .user-details {
-            background-color: #2b2b2b;
-            padding: 12px;
-            border-radius: 6px;
-            line-height: 1.6;
         }
         .preview-img {
-            width: 120px;
-            height: 120px;
-            object-fit: contain;
-            margin-top: 10px;
-            border: 1px solid #444;
-            border-radius: 6px;
-        }
-        .slip-img {
             width: 100%;
-            max-height: 300px;
+            max-height: 200px;
             object-fit: contain;
             margin-top: 10px;
             border-radius: 6px;
-            border: 1px solid #ffb703;
+            border: 1px solid #444;
         }
-        .btn-action {
-            display: flex;
-            gap: 10px;
+        .status-box {
+            display: none;
+            background-color: #2b2b2b;
+            padding: 25px 20px;
+            border-radius: 10px;
+        }
+        .timer {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffb703;
+            margin: 15px 0;
+        }
+        .retry-btn {
+            background-color: #e63946;
+            color: #fff;
             margin-top: 15px;
         }
-        .btn-approve { background-color: #2ec4b6; color: #000; }
-        .btn-reject { background-color: #e63946; color: #fff; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Admin Panel Control</h2>
-
-    <div class="card">
-        <h3>Update Payment Details</h3>
+    <div id="paymentSection">
+        <h2>Complete Payment</h2>
+        <p style="color: #bbb; font-size: 14px; margin: 0;">Niche QR Code, UPI ya Bank Details par payment karein:</p>
         
-        <div class="form-group">
-            <label>QR Code Photo Select Karein (Upload):</label>
-            <input type="file" id="adminQrFile" accept="image/*" onchange="previewAndConvertQR(event)">
-            <br>
-            <img id="qrPreview" class="preview-img" src="" alt="QR Preview" style="display:none;">
+        <div class="amount-box">Total Amount: ₹1377</div>
+
+        <div class="qr-card" id="qrContainer" style="display:none;">
+            <img id="qrImage" src="" alt="Admin QR Code">
         </div>
 
-        <div class="form-group">
-            <label>UPI ID:</label>
-            <input type="text" id="adminUpi" placeholder="e.g. 9876543210@paytm">
-        </div>
-        <div class="form-group">
-            <label>Account Holder Name:</label>
-            <input type="text" id="adminAccName" placeholder="Account Name">
-        </div>
-        <div class="form-group">
-            <label>Account Number:</label>
-            <input type="text" id="adminAccNo" placeholder="Account Number">
-        </div>
-        <div class="form-group">
-            <label>IFSC Code:</label>
-            <input type="text" id="adminIfsc" placeholder="IFSC Code">
-        </div>
-        <div class="form-group">
-            <label>Bank Name:</label>
-            <input type="text" id="adminBank" placeholder="Bank Name">
-        </div>
-        <button onclick="savePaymentSettings()">Save Payment Details</button>
-    </div>
+        <a id="payBtn" href="#" class="btn-pay" style="display:none;">Pay via UPI App (GPay/PhonePe/Paytm)</a>
 
-    <div class="card">
-        <h3>Recent Submissions & Approval</h3>
-        <div class="user-details" id="submissionData">
-            Loading submission...
-        </div>
-        <div class="btn-action">
-            <button class="btn-approve" onclick="updateStatus('approved')">Approve Payment</button>
-            <button class="btn-reject" onclick="updateStatus('rejected')">Reject Payment</button>
-        </div>
-    </div>
-</div>
-
-<script>
-let qrBase64Data = "";
-
-window.onload = function() {
-    document.getElementById('adminUpi').value = localStorage.getItem('paymentUpi') || '';
-    document.getElementById('adminAccName').value = localStorage.getItem('paymentAccName') || '';
-    document.getElementById('adminAccNo').value = localStorage.getItem('paymentAccNo') || '';
-    document.getElementById('adminIfsc').value = localStorage.getItem('paymentIfsc') || '';
-    document.getElementById('adminBank').value = localStorage.getItem('paymentBank') || '';
-
-    qrBase64Data = localStorage.getItem('paymentQrImg') || '';
-    if (qrBase64Data) {
-        const img = document.getElementById('qrPreview');
-        img.src = qrBase64Data;
-        img.style.display = 'block';
-    }
-
-    loadSubmissionData();
-    setInterval(loadSubmissionData, 3000);
-};
-
-function loadSubmissionData() {
-    const name = localStorage.getItem('userName') || 'N/A';
-    const mobile = localStorage.getItem('userMobile') || 'N/A';
-    const utr = localStorage.getItem('userUTR') || 'Pending';
-    const status = localStorage.getItem('paymentStatus') || 'Pending';
-    const slipImg = localStorage.getItem('userSlipImg') || '';
-
-    let slipHtml = slipImg ? `<br><strong>Payment Slip:</strong><br><img src="${slipImg}" class="slip-img">` : '<br><strong>Payment Slip:</strong> Not Uploaded';
-
-    document.getElementById('submissionData').innerHTML = `
-        <strong>Name:</strong> ${name}<br>
-        <strong>Mobile:</strong> ${mobile}<br>
-        <strong>Amount:</strong> ₹1377<br>
-        <strong>UTR/Txn ID:</strong> <span style="color:#2ec4b6">${utr}</span><br>
-        <strong>Status:</strong> <span style="color:#ffb703">${status.toUpperCase()}</span>
-        ${slipHtml}
-    `;
-}
-
-function previewAndConvertQR(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            qrBase64Data = e.target.result;
-            const img = document.getElementById('qrPreview');
-            img.src = qrBase64Data;
-            img.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-function savePaymentSettings() {
-    localStorage.setItem('paymentUpi', document.getElementById('adminUpi').value);
-    localStorage.setItem('paymentAccName', document.getElementById('adminAccName').value);
-    localStorage.setItem('paymentAccNo', document.getElementById('adminAccNo').value);
-    localStorage.setItem('paymentIfsc', document.getElementById('adminIfsc').value);
-    localStorage.setItem('paymentBank', document.getElementById('adminBank').value);
-    
-    if (qrBase64Data) {
-        localStorage.setItem('paymentQrImg', qrBase64Data);
-    }
-
-    alert('Payment Details & QR Code Successfully Updated!');
-}
-
-function updateStatus(status) {
-    localStorage.setItem('paymentStatus', status);
-    alert(`Payment ${status.toUpperCase()}! User screen update ho jayegi.`);
-    loadSubmissionData();
-}
-</script>
-
-</body>
-</html>
+        <div class="details-box">
+            <strong>UPI ID:</strong> <span id="dispUpi">Loading...</span><
