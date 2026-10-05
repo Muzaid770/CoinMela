@@ -100,34 +100,41 @@
             border-radius: 6px;
             border: 1px solid #444;
         }
-        .success-box {
+        .status-box {
             display: none;
             background-color: #2b2b2b;
-            padding: 20px;
+            padding: 25px 20px;
             border-radius: 10px;
-            border: 1px solid #2ec4b6;
         }
-        .success-box h3 { color: #2ec4b6; margin-top: 0; }
+        .timer {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffb703;
+            margin: 15px 0;
+        }
+        .retry-btn {
+            background-color: #e63946;
+            color: #fff;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- Payment Input Form Section -->
     <div id="paymentSection">
         <h2>Complete Payment</h2>
         <p style="color: #bbb; font-size: 14px; margin: 0;">Niche QR Code, UPI ya Bank Details par payment karein:</p>
         
         <div class="amount-box">Total Amount: ₹1377</div>
 
-        <!-- Dynamic Admin QR Code Image -->
         <div class="qr-card" id="qrContainer" style="display:none;">
             <img id="qrImage" src="" alt="Admin QR Code">
         </div>
 
-        <!-- Direct App Pay Button -->
         <a id="payBtn" href="#" class="btn-pay" style="display:none;">Pay via UPI App (GPay/PhonePe/Paytm)</a>
 
-        <!-- Dynamic Account & UPI Details Box -->
         <div class="details-box">
             <strong>UPI ID:</strong> <span id="dispUpi">Loading...</span><br>
             <hr style="border: 0.2px solid #444; margin: 8px 0;">
@@ -137,7 +144,6 @@
             <strong>Bank Name:</strong> <span id="dispBank">Loading...</span>
         </div>
 
-        <!-- Transaction Submission Form -->
         <form onsubmit="submitTransaction(event)">
             <div class="form-group">
                 <label>Payment UTR / Transaction ID Daalein:</label>
@@ -154,16 +160,34 @@
         </form>
     </div>
 
-    <!-- Success Message Box -->
-    <div id="successSection" class="success-box">
-        <h3>🎉 Payment Submitted!</h3>
-        <p style="color: #ccc; font-size: 14px;">Aapka UTR Number aur Payment Slip successfully submit ho gaye hain.</p>
-        <p style="color: #bbb; font-size: 13px;">Admin verification ke baad 15-30 minute me account activate kar dega.</p>
+    <!-- 1. Verification / Timer Section -->
+    <div id="verifyingSection" class="status-box" style="border: 1px solid #ffb703;">
+        <h3 style="color: #ffb703; margin-top: 0;">⏳ Verifying Payment...</h3>
+        <p style="color: #ccc; font-size: 14px;">Aapka payment verify ho raha hai. Kripya is page par bane rahein.</p>
+        <div class="timer" id="timerDisplay">03:00</div>
+        <p style="color: #888; font-size: 12px;">Admin status update kar raha hai...</p>
+    </div>
+
+    <!-- 2. Success Section -->
+    <div id="successSection" class="status-box" style="border: 1px solid #2ec4b6;">
+        <h2 style="color: #2ec4b6; margin-top: 0;">🎉 Congratulations!</h2>
+        <h3 style="color: #ffffff;">Payment Verified Successfully</h3>
+        <p style="color: #ccc; font-size: 14px;">Thank you for your payment! Aapka account successfully activate ho gaya hai.</p>
+    </div>
+
+    <!-- 3. Rejection Section -->
+    <div id="rejectedSection" class="status-box" style="border: 1px solid #e63946;">
+        <h3 style="color: #e63946; margin-top: 0;">Ooopps...</h3>
+        <p style="color: #ffffff; font-size: 15px; font-weight: bold;">I think your payment had some issues please check and try again.</p>
+        <button class="retry-btn" onclick="retryPayment()">Try Again</button>
     </div>
 </div>
 
 <script>
 let slipBase64 = "";
+let timeLeft = 180; // 3 minutes
+let timerInterval = null;
+let statusCheckInterval = null;
 
 window.onload = function() {
     const upi = localStorage.getItem('paymentUpi') || 'Not Set';
@@ -177,4 +201,100 @@ window.onload = function() {
     document.getElementById('dispAccName').innerText = accName;
     document.getElementById('dispAccNo').innerText = accNo;
     document.getElementById('dispIfsc').innerText = ifsc;
-    document.getElementById('dispBank').innerText
+    document.getElementById('dispBank').innerText = bank;
+
+    if (qrImg) {
+        document.getElementById('qrImage').src = qrImg;
+        document.getElementById('qrContainer').style.display = 'inline-block';
+    }
+
+    if (upi !== 'Not Set') {
+        const upiLink = `upi://pay?pa=${upi}&pn=CoinMela&am=1377`;
+        const payBtn = document.getElementById('payBtn');
+        payBtn.href = upiLink;
+        payBtn.style.display = 'block';
+    }
+};
+
+function convertSlipImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            slipBase64 = e.target.result;
+            const preview = document.getElementById('slipPreview');
+            preview.src = slipBase64;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function submitTransaction(e) {
+    e.preventDefault();
+    const utr = document.getElementById('utr').value;
+    
+    localStorage.setItem('userUTR', utr);
+    if (slipBase64) localStorage.setItem('userSlipImg', slipBase64);
+    localStorage.setItem('paymentStatus', 'pending');
+
+    document.getElementById('paymentSection').style.display = 'none';
+    document.getElementById('verifyingSection').style.display = 'block';
+
+    startTimer();
+    checkAdminStatus();
+}
+
+function startTimer() {
+    timeLeft = 180;
+    timerInterval = setInterval(() => {
+        let minutes = Math.floor(timeLeft / 60);
+        let seconds = timeLeft % 60;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        
+        document.getElementById('timerDisplay').innerText = `${minutes}:${seconds}`;
+
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            clearInterval(statusCheckInterval);
+            showRejected();
+        }
+        timeLeft--;
+    }, 1000);
+}
+
+function checkAdminStatus() {
+    statusCheckInterval = setInterval(() => {
+        const status = localStorage.getItem('paymentStatus');
+        if (status === 'approved') {
+            clearInterval(timerInterval);
+            clearInterval(statusCheckInterval);
+            showSuccess();
+        } else if (status === 'rejected') {
+            clearInterval(timerInterval);
+            clearInterval(statusCheckInterval);
+            showRejected();
+        }
+    }, 2000);
+}
+
+function showSuccess() {
+    document.getElementById('verifyingSection').style.display = 'none';
+    document.getElementById('successSection').style.display = 'block';
+}
+
+function showRejected() {
+    document.getElementById('verifyingSection').style.display = 'none';
+    document.getElementById('rejectedSection').style.display = 'block';
+}
+
+function retryPayment() {
+    localStorage.removeItem('paymentStatus');
+    document.getElementById('rejectedSection').style.display = 'none';
+    document.getElementById('paymentSection').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
