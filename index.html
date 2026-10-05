@@ -1,59 +1,101 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coin Mela - Registration</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #121212; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { background: #1e1e1e; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h2 { text-align: center; color: #f39c12; margin-bottom: 20px; }
-        label { font-size: 14px; color: #bbb; display: block; margin-top: 10px; }
-        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #333; border-radius: 6px; background: #2a2a2a; color: #fff; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #f39c12; border: none; border-radius: 6px; color: #000; font-weight: bold; font-size: 16px; margin-top: 20px; cursor: pointer; }
-        button:hover { background: #e67e22; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #1e1e1e;
+            padding: 25px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        h2 { text-align: center; color: #ffb703; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #ccc; font-size: 14px; }
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background-color: #2b2b2b;
+            color: #fff;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+        .plan-box {
+            background-color: #2b2b2b;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ffb703;
+            text-align: center;
+            font-weight: bold;
+            color: #ffb703;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #d48806;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover { background-color: #b37203; }
     </style>
 </head>
 <body>
 
-<div class="card">
+<div class="container">
     <h2>Coin Mela Registration</h2>
     <form id="regForm" onsubmit="submitRegistration(event)">
-        <label>Full Name</label>
-        <input type="text" id="name" required placeholder="Apna Poora Naam Likhein">
-
-        <label>Mobile Number</label>
-        <input type="tel" id="mobile" pattern="[0-9]{10}" required placeholder="10 Digit Mobile Number">
-
-        <label>Email Address</label>
-        <input type="email" id="email" required placeholder="Apna Email Address">
-
-        <label>Select Plan</label>
-        <select id="plan" required>
-            <option value="">Plan Chunen</option>
-            <option value="Basic - ₹100">Basic Plan - ₹100</option>
-            <option value="Standard - ₹500">Standard Plan - ₹500</option>
-            <option value="Premium - ₹1000">Premium Plan - ₹1000</option>
-        </select>
-
-        <button type="submit">Proceed to Payment</button>
+        <div class="form-group">
+            <label>Full Name / Name</label>
+            <input type="text" id="name" placeholder="Apna naam likhein" required>
+        </div>
+        <div class="form-group">
+            <label>Mobile Number</label>
+            <input type="tel" id="mobile" placeholder="Mobile number likhein" required>
+        </div>
+        <div class="form-group">
+            <label>Registration Fee</label>
+            <div class="plan-box">Plan Amount: ₹1377</div>
+        </div>
+        <button type="submit">Proceed to Payment (₹1377)</button>
     </form>
 </div>
 
 <script>
-    function submitRegistration(e) {
-        e.preventDefault();
-        const userData = {
-            id: 'CM' + Math.floor(100000 + Math.random() * 900000),
-            name: document.getElementById('name').value,
-            mobile: document.getElementById('mobile').value,
-            email: document.getElementById('email').value,
-            plan: document.getElementById('plan').value,
-            status: 'Pending'
-        };
-        localStorage.setItem('currentUser', JSON.stringify(userData));
-        window.location.href = 'payment.html';
-    }
+function submitRegistration(e) {
+    e.preventDefault();
+    const name = document.getElementById('name').value;
+    const mobile = document.getElementById('mobile').value;
+    
+    // Save details to localStorage to use on payment/admin page
+    localStorage.setItem('userName', name);
+    localStorage.setItem('userMobile', mobile);
+    localStorage.setItem('planAmount', '1377');
+    
+    window.location.href = 'payment.html';
+}
 </script>
 
 </body>
