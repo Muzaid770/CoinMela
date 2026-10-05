@@ -92,47 +92,80 @@
             font-weight: bold;
             cursor: pointer;
         }
+        .preview-img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            margin-top: 10px;
+            border-radius: 6px;
+            border: 1px solid #444;
+        }
+        .success-box {
+            display: none;
+            background-color: #2b2b2b;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #2ec4b6;
+        }
+        .success-box h3 { color: #2ec4b6; margin-top: 0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Complete Payment</h2>
-    <p style="color: #bbb; font-size: 14px; margin: 0;">Niche QR Code, UPI ya Bank Details par payment karein:</p>
-    
-    <div class="amount-box">Total Amount: ₹1377</div>
+    <div id="paymentSection">
+        <h2>Complete Payment</h2>
+        <p style="color: #bbb; font-size: 14px; margin: 0;">Niche QR Code, UPI ya Bank Details par payment karein:</p>
+        
+        <div class="amount-box">Total Amount: ₹1377</div>
 
-    <!-- Dynamic Admin QR Code Image -->
-    <div class="qr-card" id="qrContainer" style="display:none;">
-        <img id="qrImage" src="" alt="Admin QR Code">
-    </div>
-
-    <!-- Direct App Pay Button -->
-    <a id="payBtn" href="#" class="btn-pay" style="display:none;">Pay via UPI App (GPay/PhonePe/Paytm)</a>
-
-    <!-- Dynamic Account & UPI Details Box -->
-    <div class="details-box">
-        <strong>UPI ID:</strong> <span id="dispUpi">Loading...</span><br>
-        <hr style="border: 0.2px solid #444; margin: 8px 0;">
-        <strong>Account Holder:</strong> <span id="dispAccName">Loading...</span><br>
-        <strong>Account Number:</strong> <span id="dispAccNo">Loading...</span><br>
-        <strong>IFSC Code:</strong> <span id="dispIfsc">Loading...</span><br>
-        <strong>Bank Name:</strong> <span id="dispBank">Loading...</span>
-    </div>
-
-    <!-- Transaction Submission Form -->
-    <form onsubmit="submitTransaction(event)">
-        <div class="form-group">
-            <label>Payment Ke Baad UTR / Transaction ID Daalein:</label>
-            <input type="text" id="utr" placeholder="12-digit UTR / Reference No." required>
+        <!-- Dynamic Admin QR Code Image -->
+        <div class="qr-card" id="qrContainer" style="display:none;">
+            <img id="qrImage" src="" alt="Admin QR Code">
         </div>
-        <button type="submit">Submit Payment Details</button>
-    </form>
+
+        <!-- Direct App Pay Button -->
+        <a id="payBtn" href="#" class="btn-pay" style="display:none;">Pay via UPI App (GPay/PhonePe/Paytm)</a>
+
+        <!-- Dynamic Account & UPI Details Box -->
+        <div class="details-box">
+            <strong>UPI ID:</strong> <span id="dispUpi">Loading...</span><br>
+            <hr style="border: 0.2px solid #444; margin: 8px 0;">
+            <strong>Account Holder:</strong> <span id="dispAccName">Loading...</span><br>
+            <strong>Account Number:</strong> <span id="dispAccNo">Loading...</span><br>
+            <strong>IFSC Code:</strong> <span id="dispIfsc">Loading...</span><br>
+            <strong>Bank Name:</strong> <span id="dispBank">Loading...</span>
+        </div>
+
+        <!-- Transaction Submission Form -->
+        <form onsubmit="submitTransaction(event)">
+            <div class="form-group">
+                <label>Payment UTR / Transaction ID Daalein:</label>
+                <input type="text" id="utr" placeholder="12-digit UTR / Reference No." required>
+            </div>
+
+            <div class="form-group">
+                <label>Payment Slip / Screenshot Upload Karein:</label>
+                <input type="file" id="slipFile" accept="image/*" onchange="convertSlipImage(event)" required>
+                <img id="slipPreview" class="preview-img" src="" style="display:none;">
+            </div>
+
+            <button type="submit">Submit Payment Details</button>
+        </form>
+    </div>
+
+    <!-- Success Message Box -->
+    <div id="successSection" class="success-box">
+        <h3>🎉 Payment Submitted!</h3>
+        <p style="color: #ccc; font-size: 14px;">Aapka UTR Number aur Payment Slip successfully submit ho gaye hain.</p>
+        <p style="color: #bbb; font-size: 13px;">Admin verification ke baad 15-30 minute me account activate kar dega.</p>
+    </div>
 </div>
 
 <script>
+let slipBase64 = "";
+
 window.onload = function() {
-    // Read data saved from Admin Panel
     const upi = localStorage.getItem('paymentUpi') || 'Not Set';
     const accName = localStorage.getItem('paymentAccName') || 'Not Set';
     const accNo = localStorage.getItem('paymentAccNo') || 'Not Set';
@@ -140,36 +173,8 @@ window.onload = function() {
     const bank = localStorage.getItem('paymentBank') || 'Not Set';
     const qrImg = localStorage.getItem('paymentQrImg') || '';
 
-    // Update Text Details
     document.getElementById('dispUpi').innerText = upi;
     document.getElementById('dispAccName').innerText = accName;
     document.getElementById('dispAccNo').innerText = accNo;
     document.getElementById('dispIfsc').innerText = ifsc;
-    document.getElementById('dispBank').innerText = bank;
-
-    // Show Uploaded QR Image if available
-    if (qrImg) {
-        document.getElementById('qrImage').src = qrImg;
-        document.getElementById('qrContainer').style.display = 'inline-block';
-    }
-
-    // Direct UPI Link Setup
-    if (upi !== 'Not Set') {
-        const upiLink = `upi://pay?pa=${upi}&pn=CoinMela&am=1377`;
-        const payBtn = document.getElementById('payBtn');
-        payBtn.href = upiLink;
-        payBtn.style.display = 'block';
-    }
-};
-
-function submitTransaction(e) {
-    e.preventDefault();
-    const utr = document.getElementById('utr').value;
-    localStorage.setItem('userUTR', utr);
-    alert('Aapka payment details submit ho gaya hai! Admin approval ke liye wait karein.');
-    window.location.href = 'admin.html';
-}
-</script>
-
-</body>
-</html>
+    document.getElementById('dispBank').innerText
