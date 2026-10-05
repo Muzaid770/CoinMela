@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Mela - Admin Panel</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #121212; color: #fff; padding: 20px; }
+        h2 { color: #f39c12; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1e1e1e; }
+        th, td { border: 1px solid #333; padding: 12px; text-align: left; font-size: 14px; }
+        th { background: #2a2a2a; color: #f39c12; }
+        .btn-approve { background: #2ecc71; color: #000; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-reject { background: #e74c3c; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<h2>Coin Mela - Admin Approval Panel</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Name</th>
+            <th>Mobile</th>
+            <th>Plan</th>
+            <th>UTR / Ref No</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="requestTable">
+        <!-- Data dynamic load hoga -->
+    </tbody>
+</table>
+
+<script>
+    function loadRequests() {
+        let requests = JSON.parse(localStorage.getItem('coinMelaRequests') || '[]');
+        let tbody = document.getElementById('requestTable');
+        tbody.innerHTML = '';
+
+        requests.forEach((req, index) => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${req.id}</td>
+                <td>${req.name}</td>
+                <td>${req.mobile}</td>
+                <td>${req.plan}</td>
+                <td>${req.utr || 'N/A'}</td>
+                <td><b style="color:${req.status === 'Approved' ? '#2ecc71' : (req.status === 'Rejected' ? '#e74c3c' : '#f1c40f')}">${req.status}</b></td>
+                <td>
+                    ${req.status === 'Pending' ? `
+                        <button class="btn-approve" onclick="updateStatus(${index}, 'Approved')">Approve</button>
+                        <button class="btn-reject" onclick="updateStatus(${index}, 'Rejected')">Reject</button>
+                    ` : 'Done'}
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function updateStatus(index, status) {
+        let requests = JSON.parse(localStorage.getItem('coinMelaRequests') || '[]');
+        requests[index].status = status;
+        localStorage.setItem('coinMelaRequests', JSON.stringify(requests));
+        loadRequests();
+    }
+
+    loadRequests();
+</script>
+
+</body>
+</html>
