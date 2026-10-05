@@ -62,6 +62,14 @@
             border: 1px solid #444;
             border-radius: 6px;
         }
+        .slip-img {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            margin-top: 10px;
+            border-radius: 6px;
+            border: 1px solid #ffb703;
+        }
     </style>
 </head>
 <body>
@@ -132,12 +140,16 @@ window.onload = function() {
     const name = localStorage.getItem('userName') || 'N/A';
     const mobile = localStorage.getItem('userMobile') || 'N/A';
     const utr = localStorage.getItem('userUTR') || 'Pending';
+    const slipImg = localStorage.getItem('userSlipImg') || '';
+
+    let slipHtml = slipImg ? `<br><strong>Payment Slip:</strong><br><img src="${slipImg}" class="slip-img">` : '<br><strong>Payment Slip:</strong> Not Uploaded';
 
     document.getElementById('submissionData').innerHTML = `
         <strong>Name:</strong> ${name}<br>
         <strong>Mobile:</strong> ${mobile}<br>
         <strong>Amount:</strong> ₹1377<br>
         <strong>UTR/Txn ID:</strong> <span style="color:#2ec4b6">${utr}</span>
+        ${slipHtml}
     `;
 };
 
