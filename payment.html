@@ -43,8 +43,8 @@
             margin: 10px 0;
         }
         .qr-card img {
-            width: 200px;
-            height: 200px;
+            width: 220px;
+            height: 220px;
             object-fit: contain;
         }
         .details-box {
@@ -102,26 +102,25 @@
     
     <div class="amount-box">Total Amount: ₹1377</div>
 
-    <!-- QR Code Section -->
-    <div class="qr-card">
-        <!-- Auto-generated QR Code (Aapki UPI ID se auto-generate hoga) -->
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=YOUR_UPI_ID@upi&pn=CoinMela&am=1377" alt="UPI QR Code">
+    <!-- Dynamic Admin QR Code Image -->
+    <div class="qr-card" id="qrContainer" style="display:none;">
+        <img id="qrImage" src="" alt="Admin QR Code">
     </div>
 
     <!-- Direct App Pay Button -->
-    <a href="upi://pay?pa=YOUR_UPI_ID@upi&pn=CoinMela&am=1377" class="btn-pay">Pay via UPI App (GPay/PhonePe/Paytm)</a>
+    <a id="payBtn" href="#" class="btn-pay" style="display:none;">Pay via UPI App (GPay/PhonePe/Paytm)</a>
 
-    <!-- Account & UPI Details Box -->
+    <!-- Dynamic Account & UPI Details Box -->
     <div class="details-box">
-        <strong>UPI ID:</strong> 9896262431@airtel<br>
+        <strong>UPI ID:</strong> <span id="dispUpi">Loading...</span><br>
         <hr style="border: 0.2px solid #444; margin: 8px 0;">
-        <strong>Account Holder:</strong> mujaid khan<br>
-        <strong>Account Number:</strong> 9896272431<br>
-        <strong>IFSC Code:</strong> AIRPLAIRP0000001<br>
-        <strong>Bank Name:</strong> AIRTEL PAYMENT BANK
+        <strong>Account Holder:</strong> <span id="dispAccName">Loading...</span><br>
+        <strong>Account Number:</strong> <span id="dispAccNo">Loading...</span><br>
+        <strong>IFSC Code:</strong> <span id="dispIfsc">Loading...</span><br>
+        <strong>Bank Name:</strong> <span id="dispBank">Loading...</span>
     </div>
 
-    <!-- Transaction ID Submission Form -->
+    <!-- Transaction Submission Form -->
     <form onsubmit="submitTransaction(event)">
         <div class="form-group">
             <label>Payment Ke Baad UTR / Transaction ID Daalein:</label>
@@ -132,16 +131,45 @@
 </div>
 
 <script>
+window.onload = function() {
+    // Read data saved from Admin Panel
+    const upi = localStorage.getItem('paymentUpi') || 'Not Set';
+    const accName = localStorage.getItem('paymentAccName') || 'Not Set';
+    const accNo = localStorage.getItem('paymentAccNo') || 'Not Set';
+    const ifsc = localStorage.getItem('paymentIfsc') || 'Not Set';
+    const bank = localStorage.getItem('paymentBank') || 'Not Set';
+    const qrImg = localStorage.getItem('paymentQrImg') || '';
+
+    // Update Text Details
+    document.getElementById('dispUpi').innerText = upi;
+    document.getElementById('dispAccName').innerText = accName;
+    document.getElementById('dispAccNo').innerText = accNo;
+    document.getElementById('dispIfsc').innerText = ifsc;
+    document.getElementById('dispBank').innerText = bank;
+
+    // Show Uploaded QR Image if available
+    if (qrImg) {
+        document.getElementById('qrImage').src = qrImg;
+        document.getElementById('qrContainer').style.display = 'inline-block';
+    }
+
+    // Direct UPI Link Setup
+    if (upi !== 'Not Set') {
+        const upiLink = `upi://pay?pa=${upi}&pn=CoinMela&am=1377`;
+        const payBtn = document.getElementById('payBtn');
+        payBtn.href = upiLink;
+        payBtn.style.display = 'block';
+    }
+};
+
 function submitTransaction(e) {
     e.preventDefault();
     const utr = document.getElementById('utr').value;
     localStorage.setItem('userUTR', utr);
-    alert('Aapka payment submit ho gaya hai! Admin approval ke liye wait karein.');
+    alert('Aapka payment details submit ho gaya hai! Admin approval ke liye wait karein.');
     window.location.href = 'admin.html';
 }
 </script>
 
 </body>
 </html>
-
-
