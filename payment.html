@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Mela - Payment</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #121212; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: #1e1e1e; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h2 { color: #f39c12; }
+        .upi-box { background: #2a2a2a; padding: 15px; border-radius: 8px; margin: 15px 0; font-size: 18px; font-weight: bold; color: #2ecc71; border: 1px dashed #2ecc71; }
+        input { width: 100%; padding: 12px; margin-top: 10px; border: 1px solid #333; border-radius: 6px; background: #2a2a2a; color: #fff; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #2ecc71; border: none; border-radius: 6px; color: #000; font-weight: bold; font-size: 16px; margin-top: 20px; cursor: pointer; }
+        button:hover { background: #27ae60; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Complete Your Payment</h2>
+    <p>Niche diye gaye UPI ID par payment karein:</p>
+    
+    <div class="upi-box" id="upiId">coinmela@upi</div>
+
+    <form onsubmit="submitPayment(event)">
+        <label style="display:block; text-align:left; color:#bbb; margin-top:15px;">Transaction / UTR ID</label>
+        <input type="text" id="utr" required placeholder="12 Digit UTR / Ref No.">
+
+        <button type="submit">Submit Payment Details</button>
+    </form>
+</div>
+
+<script>
+    function submitPayment(e) {
+        e.preventDefault();
+        let user = JSON.parse(localStorage.getItem('currentUser'));
+        if(!user) { alert('Pehle registration karein!'); window.location.href='index.html'; return; }
+        
+        user.utr = document.getElementById('utr').value;
+        user.date = new Date().toLocaleString();
+
+        let allRequests = JSON.parse(localStorage.getItem('coinMelaRequests') || '[]');
+        allRequests.push(user);
+        localStorage.setItem('coinMelaRequests', JSON.stringify(allRequests));
+
+        alert('Payment details submit ho gayi hain! Admin approval ka wait karein.');
+        window.location.href = 'index.html';
+    }
+</script>
+
+</body>
+</html>
